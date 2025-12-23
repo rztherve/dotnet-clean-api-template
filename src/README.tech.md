@@ -127,3 +127,118 @@ git push -u origin main
 🚫 pas de code inutile
 
 
+
+*********AJOUT EF CORE *****************
+
+
+
+🎯 Objectif EF Core (clair)
+
+EF Core dans Infrastructure
+DbContext propre
+Repository EF Core
+Configuration simple
+In-Memory par défaut (parfait pour test)
+SQL Server facilement activable
+
+
+🧱 1️⃣ Installer les packages EF Core
+
+Depuis src/ :
+
+dotnet add MyApp.Infrastructure package Microsoft.EntityFrameworkCore
+dotnet add MyApp.Infrastructure package Microsoft.EntityFrameworkCore.InMemory
+dotnet add MyApp.Infrastructure package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add MyApp.Infrastructure package Microsoft.EntityFrameworkCore.Tools
+
+🧱 2️⃣ Créer le DbContext
+
+📄 Nouveau fichier
+MyApp.Infrastructure/Data/AppDbContext.cs
+
+
+🧱 3️⃣ Modifier le Repository pour EF Core
+
+📄 MyApp.Infrastructure/Repositories/ProductRepository.cs
+
+
+🧱 4️⃣ Modifier Program.cs (API)
+
+📄 MyApp.Api/Program.cs
+
+
+🧱 5️⃣ (Optionnel) Préparer SQL Server (sans l’activer)
+
+📄 MyApp.Api/appsettings.json
+
+Ajoute :
+
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=.;Database=MyAppDb;Trusted_Connection=True;"
+  }
+}
+
+👉 Si un jour on te demande SQL Server :
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+🧱 6️⃣ Vérifier que tout compile
+
+Depuis src/ :
+
+dotnet clean
+dotnet build
+
+🧱 7️⃣ Tester rapidement l’API
+dotnet run --project MyApp.Api
+
+
+Puis :
+
+POST /api/products
+
+GET /api/products
+
+
+⚠️ IMPORTANT : EF Core doit être installé UNIQUEMENT dans Infrastructure
+(Clean Architecture respectée)
+
+1️⃣ Va dans le projet Infrastructure
+
+Depuis la racine du repo :
+
+cd src/MyApp.Infrastructure
+
+2️⃣ Installe EF Core (minimum requis)
+dotnet add package Microsoft.EntityFrameworkCore
+
+3️⃣ Choisis un provider (OBLIGATOIRE)
+👉 Pour un test technique (rapide, sans DB réelle)
+
+👉 RECOMMANDÉ
+
+dotnet add package Microsoft.EntityFrameworkCore.InMemory
+
+OU si tu veux SQL Server (optionnel)
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+
+**********si version EF Core incompatible***************
+1️⃣ Supprimer le mauvais package (sécurité)
+
+Dans src/MyApp.Infrastructure :
+
+dotnet remove package Microsoft.EntityFrameworkCore.InMemory
+dotnet remove package Microsoft.EntityFrameworkCore
+
+2️⃣ Installer LES BONNES versions (EF Core 8)
+dotnet add package Microsoft.EntityFrameworkCore --version 8.0.0
+dotnet add package Microsoft.EntityFrameworkCore.InMemory --version 8.0.0
+
+
+
+
+
